@@ -5,7 +5,7 @@ from gym import utils
 from gym.envs.toy_text import discrete
 from six import StringIO
 
-VALUELINE = "RNNRNRNRNRNNRNNRNNRT"
+VALUELINE = "SNNRNRNRNRNNRNNRNNRT"
 
 class ValueLineEnv(discrete.DiscreteEnv):
     metadata = {'render.modes': ['human', 'ansi']}
@@ -40,11 +40,11 @@ class ValueLineEnv(discrete.DiscreteEnv):
                     new_state = 0
                 state_desc = VALUELINE[new_state]
                 #print("s_i=%s a=%s new_state=%s state_desc:%s"%(str(s_i),str(a),new_state,state_desc))   
-                if (state_desc == 'R'):
+                if (state_desc == 'R' or state_desc == 'S'):
                     new_state = 0
                     li.append((1.0, new_state, -10, False)) #prob, next_state, reward, done
                 if (state_desc == 'N'):
-                    li.append((1.0, new_state, 0, False)) #prob, next_state, reward, done
+                    li.append((1.0, new_state, -1, False)) #prob, next_state, reward, done
                 if (state_desc == 'T'):
                     li.append((1.0, new_state, 10, True)) #prob, next_state, reward, done
 

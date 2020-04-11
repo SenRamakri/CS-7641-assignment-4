@@ -60,13 +60,12 @@ if __name__ == '__main__':
             'name': 'value_line',
             'readable_name': 'Value Line',
             'max_steps': 25,
+        },
+        {
+            'env': environments.get_medium_rewarding_no_reward_frozen_lake_environment(),
+            'name': 'medium_frozen_lake',
+            'readable_name': 'Frozen Lake (16x16)',
         }
-        #,
-        #{
-        #    'env': environments.get_medium_rewarding_no_reward_frozen_lake_environment(),
-        #    'name': 'medium_frozen_lake',
-        #    'readable_name': 'Frozen Lake (16x16)',
-        #},
         #{
         #    'env': environments.get_windy_cliff_walking_environment(),
         #    'name': 'cliff_walking',

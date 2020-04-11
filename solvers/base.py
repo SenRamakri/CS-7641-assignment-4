@@ -94,6 +94,7 @@ class BaseSolver(ABC):
         Returns:
             Vector of length env.nS representing the value function.
         """
+        #print("evaluate_policy...max_steps:%d"%max_steps)
         env = self.get_environment()
         # Start with a random (all 0) value function
         V = np.zeros(env.nS)
@@ -111,12 +112,13 @@ class BaseSolver(ABC):
                         # Calculate the expected value
                         #print("Calculate the expected value")
                         v += action_prob * prob * (reward + discount_factor * V[next_state])
+                        #print("Calculate the expected value v=%f %f %f %f %f"%(v,action_prob,prob, reward, V[next_state]))
                 # How much our value function changed (across any states)
                 delta = max(delta, np.abs(v - V[s]))
                 V[s] = v
             # print('{} {} {}'.format(steps, delta, v))
             steps += 1
-            # print("delta: {}, theta: {}".format(delta, theta))
+            #print("delta: {}, theta: {}".format(delta, theta))
             # Stop evaluating once our value function change is below a threshold
             if delta < theta:
                 break
