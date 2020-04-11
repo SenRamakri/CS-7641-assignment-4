@@ -27,6 +27,24 @@ MAPS = {
         "FHFFHFHF",
         "FFFHFFFG"
     ],
+    "16x16": [
+        "SFFFFFFHHHFFFFFF",
+        "FFFFFFFFFFFFFFFF",
+        "FFFHFFFFFFFHHFFF",
+        "FFFFFHFFFFFFFFFF",
+        "FFFFFHFFFFFFFFFF",
+        "FFFFFHFFFFFFFFFF",
+        "FFFFFFFFHFFFFFFF",
+        "FFFFFHFFFFHHFFFF",
+        "FFFFFHFFFFFFFFFF",
+        "FFFFFHFFFFFFFFFF",
+        "FFFFFFFFFFFHHHHH",
+        "HHHHFHFFFFFFFFFF",
+        "FFFFFHFFFFHHHFFF",
+        "FFFFFFFFFFFFFFFF",
+        "FFFFFHFFFFFFHFFF",
+        "FFFFFHFFFFFFFFFG"
+    ],
     "20x20": [
         "SFFFFFFHHHFFFFFFFFFF",
         "FFFFFFFFFFFFFFFFHHFF",
@@ -101,10 +119,12 @@ class RewardingFrozenLakeEnv(discrete.DiscreteEnv):
         nS = nrow * ncol
 
         isd = np.array(desc == b'S').astype('float64').ravel()
+        #print("isd:%s"%isd)
         isd /= isd.sum()
+        #print("isd2:%s"%isd)
 
         P = {s: {a: [] for a in range(nA)} for s in range(nS)}
-
+        
         def to_s(row, col):
             return row * ncol + col
 
@@ -154,6 +174,7 @@ class RewardingFrozenLakeEnv(discrete.DiscreteEnv):
                                     rew = self.hole_reward
                             li.append((1.0, newstate, rew, done))
 
+        #print("P=%s"%str(P))
         super(RewardingFrozenLakeEnv, self).__init__(nS, nA, P, isd)
 
     def render(self, mode='human'):

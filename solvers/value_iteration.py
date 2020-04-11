@@ -7,7 +7,7 @@ from .base import BaseSolver, one_step_lookahead
 # Adapted from https://github.com/dennybritz/reinforcement-learning/blob/master/DP/Value%20Iteration%20Solution.ipynb
 class ValueIterationSolver(BaseSolver):
     # Originally 0.0001, not 0.00001
-    def __init__(self, env, discount_factor=0.9, theta=0.00001, verbose=False):
+    def __init__(self, env, discount_factor=0.9, theta=0.001, verbose=False):
         self._env = env.unwrapped
 
         self._V = np.zeros(self._env.nS)

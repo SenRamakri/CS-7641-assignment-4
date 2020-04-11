@@ -45,8 +45,8 @@ TO_PROCESS = {
 the_best = {}
 
 WATERMARK = False
-GATECH_USERNAME = 'DO NOT STEAL'
-TERM = 'Fall 2018'
+GATECH_USERNAME = ''
+TERM = 'Spring 2020'
 
 
 def watermark(p):
@@ -128,6 +128,11 @@ def plot_episode_stats(title_base, stats, smoothing_window=50):
 
 def plot_policy_map(title, policy, map_desc, color_map, direction_map):
     fig = plt.figure()
+    #print("plot_policy_map: shape:%s policy:%s map_desc:%s color_map:%s"%(policy.shape, str(policy), map_desc, color_map))
+    if(len(policy.shape)<2):
+        policy = np.reshape(policy,(1,policy.shape[0]))
+        map_desc = np.reshape(map_desc,(1,map_desc.shape[0]))
+        #print("reshaped plot_policy_map: shape:%s policy:%s"%(policy.shape, str(policy)))    
     ax = fig.add_subplot(111, xlim=(0, policy.shape[1]), ylim=(0, policy.shape[0]))
     font_size = 'x-large'
     if policy.shape[1] > 16:
@@ -138,6 +143,7 @@ def plot_policy_map(title, policy, map_desc, color_map, direction_map):
             y = policy.shape[0] - i - 1
             x = j
             p = plt.Rectangle([x, y], 1, 1)
+            #print("%s:%s:%s"%(str(i),str(j),map_desc[i, j]))
             p.set_facecolor(color_map[map_desc[i, j]])
             ax.add_patch(p)
 
@@ -156,6 +162,12 @@ def plot_policy_map(title, policy, map_desc, color_map, direction_map):
 
 def plot_value_map(title, v, map_desc, color_map):
     fig = plt.figure()
+    #print("plot_value_map: v:%s shape:%s map_desc:%s color_map:%s"%(v, map_desc.shape, map_desc, color_map))
+    if(len(map_desc.shape)<2):
+        v = np.reshape(v,(1,v.shape[0]))
+        map_desc = np.reshape(map_desc,(1,map_desc.shape[0]))
+        #print("reshaped plot_value_map: shape:%s policy:%s"%(map_desc.shape, str(map_desc)))
+
     ax = fig.add_subplot(111, xlim=(0, v.shape[1]), ylim=(0, v.shape[0]))
     font_size = 'x-large'
     if v.shape[1] > 16:

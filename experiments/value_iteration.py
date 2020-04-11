@@ -26,6 +26,7 @@ class ValueIterationExperiment(BaseExperiment):
         # Value iteration
         self._details.env.reset()
         map_desc = self._details.env.unwrapped.desc
+        print("max_steps value:%d"%self._details.max_steps)
 
         grid_file_name = '{}/VI/{}_grid.csv'.format(OUTPUT_DIRECTORY, self._details.env_name)
         with open(grid_file_name, 'w') as f:

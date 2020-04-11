@@ -50,22 +50,28 @@ if __name__ == '__main__':
     logger.info("----------")
 
     envs = [
+        #{
+        #    'env': environments.get_rewarding_frozen_lake_environment(),
+        #    'name': 'FrozenLake-v0',
+        #    'readable_name': 'FrozenLake-v0',
+        #},
         {
-            # This is not really a rewarding frozen lake env, but the custom class has extra functionality
-            'env': environments.get_rewarding_no_reward_frozen_lake_environment(),
-            'name': 'frozen_lake',
-            'readable_name': 'Frozen Lake (8x8)',
-        },
-        {
-            'env': environments.get_large_rewarding_no_reward_frozen_lake_environment(),
-            'name': 'large_frozen_lake',
-            'readable_name': 'Frozen Lake (20x20)',
-        },
-        {
-            'env': environments.get_windy_cliff_walking_environment(),
-            'name': 'cliff_walking',
-            'readable_name': 'Cliff Walking (4x12)',
+            'env': environments.get_value_line_environment(),
+            'name': 'value_line',
+            'readable_name': 'Value Line',
+            'max_steps': 25,
         }
+        #,
+        #{
+        #    'env': environments.get_medium_rewarding_no_reward_frozen_lake_environment(),
+        #    'name': 'medium_frozen_lake',
+        #    'readable_name': 'Frozen Lake (16x16)',
+        #},
+        #{
+        #    'env': environments.get_windy_cliff_walking_environment(),
+        #    'name': 'cliff_walking',
+        #    'readable_name': 'Cliff Walking (4x12)',
+        #}
     ]
 
     experiment_details = []
@@ -73,11 +79,18 @@ if __name__ == '__main__':
         env['env'].seed(seed)
         logger.info('{}: State space: {}, Action space: {}'.format(env['readable_name'], env['env'].unwrapped.nS,
                                                                    env['env'].unwrapped.nA))
-        experiment_details.append(experiments.ExperimentDetails(
-            env['env'], env['name'], env['readable_name'],
-            threads=threads,
-            seed=seed
-        ))
+        if('max_steps' in env):                                                                   
+            experiment_details.append(experiments.ExperimentDetails(
+                env['env'], env['name'], env['readable_name'],env['max_steps'],
+                threads=threads,
+                seed=seed
+            ))
+        else:
+            experiment_details.append(experiments.ExperimentDetails(
+                env['env'], env['name'], env['readable_name'],3000,
+                threads=threads,
+                seed=seed
+            ))
 
     if verbose:
         logger.info("----------")

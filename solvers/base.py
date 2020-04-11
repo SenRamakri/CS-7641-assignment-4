@@ -81,7 +81,7 @@ class BaseSolver(ABC):
 
     # TODO: Move this?
     # Adapted from https://github.com/dennybritz/reinforcement-learning/blob/master/DP/Policy%20Iteration%20Solution.ipynb
-    def evaluate_policy(self, policy, discount_factor=1.0, max_steps=None, theta=0.00001):
+    def evaluate_policy(self, policy, discount_factor=1.0, max_steps=None, theta=0.001):
         """
         Evaluate a policy given an environment and a full description of the environment's dynamics.
 
@@ -106,8 +106,10 @@ class BaseSolver(ABC):
                 # Look at the possible next actions
                 for a, action_prob in enumerate(policy[s]):
                     # For each action, look at the possible next states...
+                    #print("For each action, look at the possible next states...")
                     for prob, next_state, reward, done in env.P[s][a]:
                         # Calculate the expected value
+                        #print("Calculate the expected value")
                         v += action_prob * prob * (reward + discount_factor * V[next_state])
                 # How much our value function changed (across any states)
                 delta = max(delta, np.abs(v - V[s]))
@@ -120,17 +122,6 @@ class BaseSolver(ABC):
                 break
 
         return np.array(V)
-
-    # TODO: Move this elsewhere?
-    def render_policy(self, policy):
-        env = self.get_environment()
-        directions = env.directions()
-        policy = np.reshape(np.argmax(policy, axis=1), env.desc.shape)
-
-        for row in range(policy.shape[0]):
-            for col in range(policy.shape[1]):
-                print(directions[policy[row, col]] + ' ', end="")
-            print("")
 
     # TODO: Move this elsewhere?
     def run_policy(self, policy, max_steps=1000, render_during=False):
