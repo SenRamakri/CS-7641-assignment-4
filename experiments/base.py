@@ -220,6 +220,7 @@ class BaseExperiment(ABC):
                 best_reward = reward
                 optimal_policy = policy
 
+            print('steps: %d step_time: %d'%(steps, step_time))
             stats.add(policy, v, steps, step_time, reward, delta, converged)
             # if self._verbose:
             #     self.log("Step {}: delta={}, converged={}".format(step_count, delta, converged))
