@@ -493,6 +493,7 @@ convergence_steps_all = {}
 def find_convergence_data(envs, problem_name, problem_path, base_dir):
     print("plot_convergence: problem_name:%s problem_path:%s base_dir:%s"%(problem_name,problem_path,base_dir))
     if(not os.path.exists(".//"+base_dir+"//"+problem_name)):
+        print("find_convergence_data: ERROR: dest dir doesn't exist")
         return
 
     global convergence_times_all, convergence_steps_all
@@ -502,8 +503,9 @@ def find_convergence_data(envs, problem_name, problem_path, base_dir):
         convergence_steps = []
         for discount_factor in discount_factors:
             file = None
-            file = glob.glob('{}/{}_{}.csv'.format(problem_path, env['name'], discount_factor))
-            #print("plot_convergence: env: %s problem_name:%s problem_path:%s file:%s"%(env['name'],problem_name,problem_path,file[0]))
+            filename = '{}/{}_{}.csv'.format(problem_path, env['name'], discount_factor)
+            file = glob.glob(filename)
+            #print("plot_convergence: env: %s problem_name:%s problem_path:%s filename:%s file:%s"%(env['name'],problem_name,problem_path,filename,file))
             if(file != None):
                 df = pd.read_csv("./"+file[0])
                 total_steps = df.values[-1][0]
@@ -575,12 +577,12 @@ def plot_results(envs):
         best_params[problem_name] = find_optimal_params(problem_name, problem_path, problem['file_regex'])
         best_images[problem_name] = find_policy_images(problem_image_path, best_params[problem_name])
         data_files[problem_name] = find_data_files(problem_path, best_params[problem_name])
-        if(problem_name != 'Q'):
-            find_convergence_data(envs, problem_name, problem_path, REPORT_PATH)
 
     copy_best_images(best_images, REPORT_PATH)
     copy_data_files(data_files, REPORT_PATH)
-    plot_convergence_data(REPORT_PATH)
     plot_data(data_files, envs, REPORT_PATH)
     params_df = pd.DataFrame(best_params)
     params_df.to_csv('{}/params.csv'.format(REPORT_PATH))
+    find_convergence_data(envs, 'PI', 'output//PI', REPORT_PATH)#TODO: remove harcode
+    find_convergence_data(envs, 'VI', 'output//VI', REPORT_PATH)#TODO: remove harcode
+    plot_convergence_data(REPORT_PATH)

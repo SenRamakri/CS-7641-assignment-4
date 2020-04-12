@@ -19,7 +19,7 @@ register(
 register(
     id='RewardingFrozenLakeNoRewards16x16-v0',
     entry_point='environments:RewardingFrozenLakeEnv',
-    kwargs={'map_name': '16x16', 'rewarding': False}
+    kwargs={'map_name': '16x16', 'rewarding': True}
 )
 
 register(

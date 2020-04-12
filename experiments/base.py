@@ -215,7 +215,7 @@ class BaseExperiment(ABC):
 
         while not convergence_check_fn(solver, step_count) and step_count < MAX_STEP_COUNT:
             policy, v, steps, step_time, reward, delta, converged = solver.step()
-            # print('{} {}'.format(reward, best_reward))
+            #print('{} {}'.format(reward, best_reward))
             if reward > best_reward:
                 best_reward = reward
                 optimal_policy = policy

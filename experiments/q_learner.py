@@ -17,7 +17,7 @@ if not os.path.exists(OUTPUT_DIRECTORY + '/images/Q'):
 
 class QLearnerExperiment(BaseExperiment):
     def __init__(self, details, verbose=False):
-        self.max_episodes = 2000
+        self.max_episodes = 50000
 
         super(QLearnerExperiment, self).__init__(details, verbose)
 
@@ -34,10 +34,14 @@ class QLearnerExperiment(BaseExperiment):
             f.write("params,time,steps,reward_mean,reward_median,reward_min,reward_max,reward_std\n")
 
         alphas = [0.1, 0.5, 0.9]
-        q_inits = ['random', 0]
+        #alphas = [0.1]
+        #q_inits = ['random', 0]
+        q_inits = [0]
         epsilons = [0.1, 0.3, 0.5]
+        #epsilons = [0.1]
         epsilon_decays = [0.0001]
-        discount_factors = np.round(np.linspace(0, 0.9, num=10), 2)
+        #discount_factors = np.round(np.linspace(0, 0.9, num=10), 2)
+        discount_factors = [0.9]
         dims = len(discount_factors) * len(alphas) * len(q_inits) * len(epsilons) * len(epsilon_decays)
         self.log("Searching Q in {} dimensions".format(dims))
 
@@ -60,6 +64,7 @@ class QLearnerExperiment(BaseExperiment):
                                                          q_init=q_init, verbose=self._verbose)
 
                             stats = self.run_solver_and_collect(qs, self.convergence_check_fn)
+                            #print("optimal_policy: %s"%(str(stats.optimal_policy)))
 
                             self.log("Took {} episodes".format(len(stats.steps)))
                             stats.to_csv('{}/Q/{}_{}_{}_{}_{}_{}.csv'.format(OUTPUT_DIRECTORY, self._details.env_name,

@@ -6,7 +6,7 @@ from .base import BaseSolver, one_step_lookahead, EpisodeStats
 
 # Adapted from https://github.com/dennybritz/reinforcement-learning/blob/master/TD/Q-Learning%20Solution.ipynb
 class QLearningSolver(BaseSolver):
-    def __init__(self, env, max_episodes, max_steps_per_episode=500, discount_factor=1.0, alpha=0.5, epsilon=0.1,
+    def __init__(self, env, max_episodes, max_steps_per_episode=25600, discount_factor=1.0, alpha=0.5, epsilon=0.1,
                  epsilon_decay=0.001, q_init=0, theta=0.001, min_consecutive_sub_theta_episodes=10, verbose=False):
         self._env = env.unwrapped
 
@@ -32,6 +32,9 @@ class QLearningSolver(BaseSolver):
 
         self._init_q()
 
+        self._greedy_policy_function = self._make_epsilon_greedy_policy(self._Q, self._epsilon, self._env.action_space.n)
+        #print("self.get_policy(%s)"%(self.get_policy()))
+
         super(QLearningSolver, self).__init__(verbose)
 
     def step(self):
@@ -45,11 +48,12 @@ class QLearningSolver(BaseSolver):
         episode_steps = 0
         for t in range(self._max_steps_per_episode+1):
             # Take a step
-            action_probs = self._policy_function(state)
+            action_probs = self._greedy_policy_function(state)
             # TODO: Which one?
             action = np.random.choice(np.arange(len(action_probs)), p=action_probs)
+            
             next_state, reward, done, _ = self._env.step(action)
-
+            #print("action(%d): %s reward:%d done:%s"%((t,action, reward,str(done))))
             # Update statistics
             self._stats.episode_rewards[self._steps] += reward
             self._stats.episode_lengths[self._steps] = t
@@ -74,6 +78,7 @@ class QLearningSolver(BaseSolver):
 
             state = next_state
 
+        #print("self._last_delta(%s): self._theta(%s)"%((str(self._last_delta),str(self._theta))))
         if self._last_delta < self._theta:
             self._consecutive_sub_theta_episodes += 1
         else:
@@ -82,7 +87,8 @@ class QLearningSolver(BaseSolver):
         self._step_times.append(time.clock() - start_time)
 
         self._steps += 1
-
+        
+        #print("total_reward(%s): episode_steps(%s) reward(%s)"%((str(total_reward),str(episode_steps),str(total_reward/episode_steps))))
         return self.get_policy(), self.get_value(), self._steps, self._step_times[-1], \
             total_reward/episode_steps, self._last_delta, self.has_converged()
 
@@ -139,7 +145,7 @@ class QLearningSolver(BaseSolver):
             self._Q = np.zeros(shape=(self._env.observation_space.n, self._env.action_space.n))
         else:
             self._Q = np.full((self._env.observation_space.n, self._env.action_space.n), float(self._q_init))
-
+        
     def _policy_function(self, observation):
         A = np.ones(self._env.action_space.n, dtype=float) * self._epsilon / self._env.action_space.n
         best_action = np.argmax(self._Q[observation])
@@ -147,24 +153,24 @@ class QLearningSolver(BaseSolver):
         return A
 
     # Adapted from https://github.com/dennybritz/reinforcement-learning/blob/master/TD/Q-Learning%20Solution.ipynb
-    def _make_epsilon_greedy_policy(self):
+    def _make_epsilon_greedy_policy(self, Q, epsilon, nA):
         """
         Creates an epsilon-greedy policy based on a given Q-function and epsilon.
-
+        
         Args:
             Q: A dictionary that maps from state -> action-values.
                 Each value is a numpy array of length nA (see below)
-            epsilon: The probability to select a random action . float between 0 and 1.
+            epsilon: The probability to select a random action. Float between 0 and 1.
             nA: Number of actions in the environment.
-
+        
         Returns:
             A function that takes the observation as an argument and returns
             the probabilities for each action in the form of a numpy array of length nA.
-
+        
         """
         def policy_fn(observation):
-            A = np.ones(self._env.action_space.n, dtype=float) * self._epsilon / self._env.action_space.n
-            best_action = np.argmax(self._Q[observation])
-            A[best_action] += (1.0 - self._epsilon)
+            A = np.ones(nA, dtype=float) * epsilon / nA
+            best_action = np.argmax(Q[observation])
+            A[best_action] += (1.0 - epsilon)
             return A
         return policy_fn
