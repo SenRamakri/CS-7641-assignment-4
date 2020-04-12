@@ -217,7 +217,7 @@ def plot_time_vs_steps(title, df, xlabel="Steps", ylabel="Time (s)"):
     plt.grid()
     plt.tight_layout()
 
-    plt.plot(df.index.values, df['time'], '-', label='Time', linewidth=1)
+    plt.plot(df['steps'], df['time'], '-', label='Time', linewidth=1)
     plt.legend(loc="best",fontsize=12)
 
     return watermark(plt)
@@ -232,10 +232,11 @@ def plot_reward_and_delta_vs_steps(title, df, xlabel="Steps", ylabel="Reward"):
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
 
-    lns1 = ax.plot(df.index.values, df['reward'], linewidth=1, label=ylabel, color='tab:blue')
+    #print("plot_reward_and_delta_vs_steps: %s : %s"%(str(df['steps']),str(df['reward'])))
+    lns1 = ax.plot(df['steps'], df['reward'], linewidth=1, label=ylabel, color='tab:blue')
 
     ex_ax = ax.twinx()
-    lns2 = ex_ax.plot(df.index.values, df['delta'], linewidth=1, label='Delta', color='tab:orange')
+    lns2 = ex_ax.plot(df['steps'], df['delta'], linewidth=1, label='Delta', color='tab:orange')
     ex_ax.set_ylabel('Delta')
     ex_ax.tick_params('y')
 
