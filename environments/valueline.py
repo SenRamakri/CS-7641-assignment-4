@@ -69,10 +69,10 @@ class ValueLineEnv(discrete.DiscreteEnv):
 
     def colors(self):
         return {
-            b'S': 'yellow',
+            b'S': 'green',
             b'R': 'red',
             b'N': 'lightgreen',
-            b'T': 'green'
+            b'T': 'gold'
         }
     
     def directions(self):
