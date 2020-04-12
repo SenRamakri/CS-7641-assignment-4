@@ -60,11 +60,11 @@ if __name__ == '__main__':
             'name': 'medium_frozen_lake',
             'readable_name': 'Frozen Lake (16x16)',
         },
-        {
-            'env': environments.get_large_rewarding_no_reward_frozen_lake_environment(),
-            'name': 'large_frozen_lake',
-            'readable_name': 'Frozen Lake (20x20)',
-        }
+        #{
+        #    'env': environments.get_large_rewarding_no_reward_frozen_lake_environment(),
+        #    'name': 'large_frozen_lake',
+        #    'readable_name': 'Frozen Lake (20x20)',
+        #}
     ]
 
     experiment_details = []

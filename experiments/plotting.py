@@ -217,8 +217,8 @@ def plot_time_vs_steps(title, df, xlabel="Steps", ylabel="Time (s)"):
     plt.grid()
     plt.tight_layout()
 
-    plt.plot(df.index.values, df['time'], '-', linewidth=1)
-    plt.legend(loc="best")
+    plt.plot(df.index.values, df['time'], '-', label='Time', linewidth=1)
+    plt.legend(loc="best",fontsize=12)
 
     return watermark(plt)
 
@@ -246,7 +246,7 @@ def plot_reward_and_delta_vs_steps(title, df, xlabel="Steps", ylabel="Reward"):
 
     lns = lns1 + lns2
     labs = [l.get_label() for l in lns]
-    ax.legend(lns, labs, loc=0)
+    ax.legend(lns, labs, loc=0,fontsize=12)
 
     return watermark(plt)
 
@@ -374,7 +374,7 @@ def find_data_files(base_dir, params):
         }
         if len(episode_files) > 0:
             data_files[mdp]['episode_file'] = episode_files[0]
-
+    print("data_files:%s"%data_files)
     return data_files
 
 
@@ -417,10 +417,10 @@ def copy_data_files(data_files, base_dir):
 
                 copyfile(file_name, file_dest)
 
-
 def plot_data(data_files, envs, base_dir):
     for problem_name in data_files:
         for mdp in data_files[problem_name]:
+            print("problem_name: %s mdp: %s"%(problem_name,mdp))
             env = lookup_env_from_mdp(envs, mdp)
             if env is None:
                 logger.error("Unable to find env for MDP {}".format(mdp))
@@ -428,10 +428,10 @@ def plot_data(data_files, envs, base_dir):
 
             mdp_files = data_files[problem_name][mdp]
 
-            step_term = 'Iterations'
+            step_term = 'Steps'
             if problem_name == 'Q':
                 step_term = 'Episodes'
-
+            print("mdp_files: %s"%(mdp_files))
             df = pd.read_csv(mdp_files['file'])
 
             title = '{}: {} - Time vs {}'.format(env['readable_name'],
@@ -486,11 +486,73 @@ def problem_name_to_descriptive_name(problem_name):
         return "Q-Learner"
     return 'Unknown'
 
+convergence_times_all = {}
+convergence_steps_all = {}
+
+def find_convergence_data(envs, problem_name, problem_path, base_dir):
+    global convergence_times_all, convergence_steps_all
+    discount_factors = np.round(np.linspace(0, 0.9, num=10), 2)
+    for env in envs:
+        convergence_times = []
+        convergence_steps = []
+        for discount_factor in discount_factors:
+            file = glob.glob('{}/{}_{}.csv'.format(problem_path, env['name'], discount_factor))
+            print("plot_convergence: env: %s problem_name:%s problem_path:%s file:%s"%(env['name'],problem_name,problem_path,file[0]))
+            df = pd.read_csv("./"+file[0])
+            total_steps = df.values[-1][0]
+            total_time = df.sum(axis=0)[1]
+            convergence_times.append(total_time)
+            convergence_steps.append(total_steps)
+        print("convergence_steps: %s"%convergence_steps)        
+        print("convergence_times: %s"%convergence_times)
+        convergence_times_all[env['name']][problem_name] = convergence_times
+        convergence_steps_all[env['name']][problem_name] = convergence_steps
+        
+def plot_convergence_data(base_dir):
+    global convergence_times_all, convergence_steps_all
+    discount_factors = np.round(np.linspace(0, 0.9, num=10), 2)
+    
+    for prob in convergence_steps_all:
+        file_name_steps = '{}/{}_convergence_steps.png'.format(base_dir, prob)
+        print("Steps conv file:%s"%file_name_steps)
+        plt.close()
+        plt.figure()
+        plt.title("Discount factor vs Convergence Iterations(%s)"%prob)
+        plt.xlabel("Discount factor")
+        plt.ylabel("Convergence Iterations")
+        plt.tight_layout()
+        plt.plot(discount_factors, convergence_steps_all[prob]['PI'], '-', label='PI', linewidth=1)
+        plt.plot(discount_factors, convergence_steps_all[prob]['VI'], '-', label='VI', linewidth=1)
+        plt.legend(loc="upper left",fontsize=12)
+        plt.savefig(file_name_steps, format='png', dpi=150)
+        plt.close()
+
+    for prob in convergence_times_all:
+        file_name_times = '{}/{}_convergence_times.png'.format(base_dir, prob)
+        print("Steps conv file:%s"%file_name_times)
+        plt.close()
+        plt.figure()
+        plt.title("Discount factor vs Convergence Times(%s)"%prob)
+        plt.xlabel("Discount factor")
+        plt.ylabel("Convergence Times")
+        plt.tight_layout()
+        plt.plot(discount_factors, convergence_steps_all[prob]['PI'], '-', label='PI', linewidth=1)
+        plt.plot(discount_factors, convergence_steps_all[prob]['VI'], '-', label='VI', linewidth=1)
+        plt.legend(loc="upper left",fontsize=12)
+        plt.savefig(file_name_times, format='png', dpi=150)
+        plt.close()
+
 
 def plot_results(envs):
+    print("plot_results")
+    global convergence_times_all, convergence_steps_all
     best_params = {}
     best_images = {}
     data_files = {}
+    for env in envs:
+        convergence_times_all[env['name']] = {}
+        convergence_steps_all[env['name']] = {}
+
     for problem_name in TO_PROCESS:
         logger.info("Processing {}".format(problem_name))
 
@@ -501,9 +563,12 @@ def plot_results(envs):
         best_params[problem_name] = find_optimal_params(problem_name, problem_path, problem['file_regex'])
         best_images[problem_name] = find_policy_images(problem_image_path, best_params[problem_name])
         data_files[problem_name] = find_data_files(problem_path, best_params[problem_name])
+        if(problem_name != 'Q'):
+            find_convergence_data(envs, problem_name, problem_path, REPORT_PATH)
 
     copy_best_images(best_images, REPORT_PATH)
     copy_data_files(data_files, REPORT_PATH)
+    plot_convergence_data(REPORT_PATH)
     plot_data(data_files, envs, REPORT_PATH)
     params_df = pd.DataFrame(best_params)
     params_df.to_csv('{}/params.csv'.format(REPORT_PATH))
